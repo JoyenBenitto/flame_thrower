@@ -13,7 +13,8 @@ typedef enum {
     NORTH,
     SOUTH,
     EAST,
-    WEST
+    WEST,
+    PE
     } Direction deriving(Bits, Eq);
 
     //type of the packets
@@ -39,6 +40,7 @@ module mk_buffer(Ifc_buffer);
     FIFOF#(Payload) south <- mkSizedFIFOF(`FIFO_DEPTH);
     FIFOF#(Payload) east <- mkSizedFIFOF(`FIFO_DEPTH);
     FIFOF#(Payload) west <- mkSizedFIFOF(`FIFO_DEPTH);
+    FIFOF#(Payload) pe <- mkSizedFIFOF(`FIFO_DEPTH);
 
     method Action queue_data(Direction fifo_id, Payload data);
         action
@@ -47,6 +49,7 @@ module mk_buffer(Ifc_buffer);
                 SOUTH: south.enq(data);
                 EAST: east.enq(data);
                 WEST: west.enq(data);
+                PE: pe.enq(data);
             endcase
         endaction
     endmethod: queue_data
@@ -58,6 +61,7 @@ module mk_buffer(Ifc_buffer);
                 SOUTH: south.deq();
                 EAST: east.deq();
                 WEST: west.deq();
+                PE: pe.deq();
             endcase
 
             case (fifo_id) matches
@@ -65,6 +69,7 @@ module mk_buffer(Ifc_buffer);
                 SOUTH: return south.first();
                 EAST: return east.first();
                 WEST: return west.first();
+                PE: return pe.first();
             endcase
         endactionvalue
     endmethod: packet_pop

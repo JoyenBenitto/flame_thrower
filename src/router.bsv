@@ -1,8 +1,9 @@
 package router;
 
-import FIFO      ::   *  ;
-import FIFOF     ::   *  ;
-import buffer    ::   *  ;
+import FIFO          ::   *  ;
+import FIFOF         ::   *  ;
+import router_core   ::   *  ;
+import buffer        ::   *  ;
 
 interface Ifc_router;
     //checks if the queue is available and queue's data
@@ -28,6 +29,11 @@ module mk_router(Ifc_router);
     Ifc_buffer vc_2 <- mk_buffer(); //virtual channel 2
     Ifc_buffer vc_3 <- mk_buffer(); //virtual channel 3
     Ifc_buffer vc_4 <- mk_buffer(); //virtual channel 4
+
+    Ifc_router_core rc_vc_1 <- mk_router_core(0,0); //router controler for vc-1
+    Ifc_router_core rc_vc_2 <- mk_router_core(0,1); //router controler for vc-2
+    Ifc_router_core rc_vc_3 <- mk_router_core(1,0); //router controler for vc-3
+    Ifc_router_core rc_vc_4 <- mk_router_core(1,1); //router controler for vc-4
 
     method Action queue_data_vc1(Packet incoming_packet);
         action
