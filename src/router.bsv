@@ -11,6 +11,11 @@ interface Ifc_router;
     method Action queue_data_vc2(Router_core_packet data); //data from channel two
     method Action queue_data_vc3(Router_core_packet data); //data from channel three
     method Action queue_data_vc4(Router_core_packet data); //data from channel four
+    //The below will provide interface wires that can be used to conect
+    //method ActionValue #(Router_core_packet) router_out_North (Bit#(2) crossbar_selector); //the arbiter will choose the Input channel to route
+    //method ActionValue #(Router_core_packet) router_out_South (Bit#(2) crossbar_selector);
+    //method ActionValue #(Router_core_packet) router_out_EAST (Bit#(2) crossbar_selector);
+    //method ActionValue #(Router_core_packet) router_out_WEST (Bit#(2) crossbar_selector);
 endinterface: Ifc_router
 
 (*synthesize*)
@@ -31,9 +36,9 @@ module mk_router(Ifc_router);
     Ifc_buffer vc_4 <- mk_buffer(); //virtual channel 4
 
     Ifc_router_core rc_vc_1 <- mk_router_core(0,0); //router controler for vc-1
-    Ifc_router_core rc_vc_2 <- mk_router_core(0,1); //router controler for vc-2
-    Ifc_router_core rc_vc_3 <- mk_router_core(1,0); //router controler for vc-3
-    Ifc_router_core rc_vc_4 <- mk_router_core(1,1); //router controler for vc-4
+    Ifc_router_core rc_vc_2 <- mk_router_core(0,0); //router controler for vc-2
+    Ifc_router_core rc_vc_3 <- mk_router_core(0,0); //router controler for vc-3
+    Ifc_router_core rc_vc_4 <- mk_router_core(0,0); //router controler for vc-4
 
     method Action queue_data_vc1(Router_core_packet incoming_packet);
         action

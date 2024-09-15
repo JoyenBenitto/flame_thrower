@@ -42,7 +42,7 @@ module mk_router_core #(Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, Bit#(`NUMBE
                     dir= WEST;
                 end
             end
-        
+
             else if (packet.router_id_x == curr_router_id_x) begin
                 if (packet.router_id_y > curr_router_id_y) begin
                     dir= NORTH;
