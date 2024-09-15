@@ -9,15 +9,20 @@ module mk_router();
 
     // Access the buffer instance here
     Bit#(32) data= 32'd32;
-    rule send_data;
-        Bool status <- buffer.check_queue_availability();
-        $display("sending data %d", status);
+
+    Reg#(Bool) status<- mkReg(True);
+
+    rule update_status;
+        status <= buffer.check_queue_availability();
+    endrule
+
+    rule send_data (True);
         if (status) begin
-            $display("sending data %d", status);
+            $display($time," :sending data %d", status);
             buffer.push_data(data);
         end
         else begin
-            $display("router queue is full");
+            $display($time," :router queue is full");
             $finish;
         end
     endrule
