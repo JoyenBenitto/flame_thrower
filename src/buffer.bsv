@@ -1,57 +1,73 @@
 
 package buffer;
 
-import FIFO::*;
-import FIFOF::*;
+import FIFO   ::  *;
+import FIFOF  ::  *;
 
+//some macros
+`define FIFO_WIDTH 32
+`define FIFO_DEPTH 5
+
+
+typedef enum {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST
+    } Direction deriving(Bits, Eq);
+
+    //type of the packets
+typedef struct {
+    Bit#(`FIFO_WIDTH) payload;
+} Payload deriving (Bits, Eq);
+
+typedef struct {
+    Direction dest;  // 8-bit destination address
+    Payload payload; // 32-bit data payload
+} Packet deriving (Bits, Eq);
+    
 interface Ifc_buffer;
-    method Action push_data (Bit#(32) data); 
-    /*32 bit input interface that will send 32 bit data inside the module*/
-    method Bool check_queue_availability(); 
-    /*Will provide one bit signal to check if the buffer can accept flits*/
-    method ActionValue #(Bit#(32)) pop();
+    //checks if the queue is available and queue's data
+    method Action queue_data(Direction fifo_id, Payload data);
+    method ActionValue #(Payload) packet_pop(Direction fifo_id);
 endinterface: Ifc_buffer
 
 (*synthesize*)
-module mkBuffer(Ifc_buffer);
+module mk_buffer(Ifc_buffer);
+    //FIFO bank
+    FIFOF#(Payload) north <- mkSizedFIFOF(`FIFO_DEPTH);
+    FIFOF#(Payload) south <- mkSizedFIFOF(`FIFO_DEPTH);
+    FIFOF#(Payload) east <- mkSizedFIFOF(`FIFO_DEPTH);
+    FIFOF#(Payload) west <- mkSizedFIFOF(`FIFO_DEPTH);
 
-    FIFOF#(Bit#(32)) queue <- mkSizedFIFOF(4); 
-
-    rule display_fifo_contents;
-        if (queue.notFull) begin
-            Bit#(32) data = queue.first();
-            $display($time," :FIFO contains: %d", data);
-        end
-    endrule
-
-    Wire#(Bool) queue_status <- mkWire();
-
-    rule updater;
-        queue_status <= queue.notFull();
-    endrule
-
-    rule disp;
-        $display($time," :some val--> %d", queue_status);
-        if (queue_status == False) begin
-            $finish;
-        end
-    endrule
-
-    method Bool check_queue_availability();
-        return queue_status; // Return True if the queue is not full, otherwise return False
-    endmethod
-
-    method ActionValue #(Bit#(32)) pop();
-        return queue.first();
-    endmethod
-
-    // Create a FIFO of size 4
-    method Action push_data (Bit#(32) flit);
+    method Action queue_data(Direction fifo_id, Payload data);
         action
-            queue.enq(flit);
+            case (fifo_id) matches
+                NORTH: north.enq(data);
+                SOUTH: south.enq(data);
+                EAST: east.enq(data);
+                WEST: west.enq(data);
+            endcase
         endaction
-    endmethod
+    endmethod: queue_data
 
-endmodule: mkBuffer
+    method ActionValue #(Payload) packet_pop(Direction fifo_id);
+        actionvalue
+            case (fifo_id) matches
+                NORTH: north.deq();
+                SOUTH: south.deq();
+                EAST: east.deq();
+                WEST: west.deq();
+            endcase
+
+            case (fifo_id) matches
+                NORTH: return north.first();
+                SOUTH: return south.first();
+                EAST: return east.first();
+                WEST: return west.first();
+            endcase
+        endactionvalue
+    endmethod: packet_pop
+endmodule: mk_buffer
 
 endpackage: buffer
