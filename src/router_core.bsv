@@ -9,7 +9,7 @@ import buffer :: * ;
 typedef struct{
     Bit#(`NUMBER_OF_ROUTERS_x) router_id_x; //the x id
     Bit#(`NUMBER_OF_ROUTERS_y) router_id_y; //the y id
-    Packet payload; //the data
+    Payload payload; //the data
 } Router_core_packet deriving(Bits, Eq);
 
 interface Ifc_router_core;
@@ -24,28 +24,30 @@ module mk_router_core #(Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, Bit#(`NUMBE
 
     method ActionValue #(Direction) router_core (Router_core_packet packet);
         Direction dir= ?;
-        if (packet.router_id_x != curr_router_id_x) begin
-            if (packet.router_id_x > curr_router_id_x) begin
-                dir= EAST;
+        actionvalue
+            if (packet.router_id_x != curr_router_id_x) begin
+                if (packet.router_id_x > curr_router_id_x) begin
+                    dir= EAST;
+                end
+                else if (packet.router_id_x < curr_router_id_x)begin
+                    dir= WEST;
+                end
             end
-            else if (packet.router_id_x < curr_router_id_x)begin
-                dir= WEST;
+        
+            else if (packet.router_id_x == curr_router_id_x) begin
+                if (packet.router_id_y > curr_router_id_y) begin
+                    dir= NORTH;
+                end
+                else if (packet.router_id_y < curr_router_id_y)begin
+                    dir= SOUTH;
+                end
             end
-        end
-    
-        else if (packet.router_id_x == curr_router_id_x) begin
-            if (packet.router_id_y > curr_router_id_y) begin
-                dir= NORTH;
+            else if ((packet.router_id_x == curr_router_id_x) &&
+                (packet.router_id_x == curr_router_id_x)) begin
+                dir = PE;
             end
-            else if (packet.router_id_y < curr_router_id_y)begin
-                dir= SOUTH;
-            end
-        end
-        else if ((packet.router_id_x == curr_router_id_x) &&
-            (packet.router_id_x == curr_router_id_x)) begin
-            dir = PE;
-        end
-        return dir;
+            return dir;
+        endactionvalue
     endmethod
 endmodule
 
