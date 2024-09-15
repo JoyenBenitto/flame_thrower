@@ -1,9 +1,18 @@
 package router_core;
 
-import buffer :: * ;
-
 `define NUMBER_OF_ROUTERS_x 2
 `define NUMBER_OF_ROUTERS_y 2
+`define PAYLOAD_WIDTH 32
+
+typedef enum {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    PE } Direction deriving(Bits, Eq);
+
+//The payload type
+typedef Bit#(`PAYLOAD_WIDTH) Payload;
 
 //The network interface sends data in this particular format
 typedef struct{

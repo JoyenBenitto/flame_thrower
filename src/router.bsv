@@ -38,25 +38,25 @@ module mk_router(Ifc_router);
     method Action queue_data_vc1(Router_core_packet incoming_packet);
         action
             Direction dir <- rc_vc_1.router_core(incoming_packet);
-            vc_1.queue_data(dir, incoming_packet.payload);
+            vc_1.queue_data(dir, incoming_packet);
         endaction
     endmethod
     method Action queue_data_vc2(Router_core_packet incoming_packet);
         action
             Direction dir <- rc_vc_2.router_core(incoming_packet);
-            vc_2.queue_data(dir, incoming_packet.payload);
+            vc_2.queue_data(dir, incoming_packet);
         endaction
     endmethod
     method Action queue_data_vc3(Router_core_packet incoming_packet);
         action
             Direction dir <- rc_vc_3.router_core(incoming_packet);
-            vc_3.queue_data(dir, incoming_packet.payload);
+            vc_3.queue_data(dir, incoming_packet);
         endaction
     endmethod
     method Action queue_data_vc4(Router_core_packet incoming_packet);
         action
             Direction dir <- rc_vc_4.router_core(incoming_packet);
-            vc_4.queue_data(dir, incoming_packet.payload);
+            vc_4.queue_data(dir, incoming_packet);
         endaction
     endmethod
 
