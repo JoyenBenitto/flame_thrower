@@ -19,6 +19,6 @@ VC for associated processing element.
 
 ![router_diag](./docs/router_arch.svg)
 
-[NOTE]
+>[!NOTE]
 The above architercture does bring in a lot of drawbacks, for example the duplication of hardware for every direction such as the need for 4 4x1 crossbars and a seperate 
 arbiter for each and ofcourse some of the virtual channels may go unused if the traffic is not uniform. The later version of the router are expected to overcome these drawbacks. 
