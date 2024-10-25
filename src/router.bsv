@@ -4,7 +4,9 @@ import FIFO          ::   *  ;
 import FIFOF         ::   *  ;
 import router_core   ::   *  ;
 import buffer        ::   *  ;
-import router        ::   *  ;
+import Arbiter       ::   *  ;
+import Vector        ::   *  ;
+
 
 interface Ifc_router;
     //checks if the queue is available and queue's data
@@ -13,10 +15,10 @@ interface Ifc_router;
     method Action queue_data_vc3(Router_core_packet data); //data from channel three
     method Action queue_data_vc4(Router_core_packet data); //data from channel four
     //The below will provide interface wires that can be used to connect
-    method ActionValue #(Router_core_packet) router_out_North (Bit#(2) crossbar_selector); //the arbiter will choose the Input channel to route
-    method ActionValue #(Router_core_packet) router_out_South (Bit#(2) crossbar_selector);
-    method ActionValue #(Router_core_packet) router_out_EAST (Bit#(2) crossbar_selector);
-    method ActionValue #(Router_core_packet) router_out_WEST (Bit#(2) crossbar_selector);
+    method ActionValue #(Router_core_packet) router_out_North (); //the arbiter will choose the Input channel to route
+    // method ActionValue #(Router_core_packet) router_out_South (Bit#(2) crossbar_selector);
+    // method ActionValue #(Router_core_packet) router_out_EAST (Bit#(2) crossbar_selector);
+    // method ActionValue #(Router_core_packet) router_out_WEST (Bit#(2) crossbar_selector);
 endinterface: Ifc_router
 
 (*synthesize*)
@@ -30,7 +32,12 @@ module mk_router(Ifc_router);
     4) The crossbar controlled by the arbiter will output the payload in the respective interface
     */
 
-    //The buffer is arranged in a SAMQ (Statically allocated multiqueue) manner
+    Arbiter_IFC#(4) north_arbiter <- mkArbiter(False);
+    Arbiter_IFC#(4) south_arbiter <- mkArbiter(False);
+    Arbiter_IFC#(4) east_arbiter <- mkArbiter(False);
+    Arbiter_IFC#(4) west_arbiter <- mkArbiter(False);
+
+    //The buffer is arranged in a SAFQ (Statically allocated fixed queue) manner
     Ifc_buffer vc_1 <- mk_buffer(); //virtual channel 1
     Ifc_buffer vc_2 <- mk_buffer(); //virtual channel 2
     Ifc_buffer vc_3 <- mk_buffer(); //virtual channel 3
@@ -41,10 +48,20 @@ module mk_router(Ifc_router);
     Ifc_router_core rc_vc_3 <- mk_router_core(0,0); //router controller for vc-3
     Ifc_router_core rc_vc_4 <- mk_router_core(0,0); //router controller for vc-4
 
-    Ifc_corssbar to_north <- mkCrossbar(); //Crossbar from each north vc to north
-    Ifc_corssbar to_south <- mkCrossbar(); //Crossbar from each south vc to south
-    Ifc_corssbar to_east <- mkCrossbar(); //Crossbar from each east vc to east
-    Ifc_corssbar to_west <- mkCrossbar(); //Crossbar from each west vc to west
+    rule north_arbiteration;
+        north_arbiter.clients[0].request();
+        north_arbiter.clients[1].request();
+        north_arbiter.clients[2].request();
+        north_arbiter.clients[3].request();
+    endrule
+
+    rule grant_log_display;
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        $display($time, " north_vc2 grant status: %d", north_arbiter.clients[1].grant());
+        $display($time, " north_vc3 grant status: %d", north_arbiter.clients[2].grant());
+        $display($time, " north_vc4 grant status: %d", north_arbiter.clients[3].grant());
+        $display("\n");
+    endrule
 
     method Action queue_data_vc1(Router_core_packet incoming_packet);
         action
@@ -71,28 +88,18 @@ module mk_router(Ifc_router);
         endaction
     endmethod
 
-    
-    method ActionValue #(Router_core_packet) router_out_North (Bit#(2) crossbar_selector);
+    method ActionValue #(Router_core_packet) router_out_North ();
         actionvalue
-            
-        endactionvalue
-    endmethod
+            if (north_arbiter.clients[0].grant())begin
+                $display("dequeing and poping vc_1 north");
+                return vc_1.packet_pop(NORTH);
+            end
+            else begin
+                return vc_2.packet_pop(NORTH);
+            end
 
-    method ActionValue #(Router_core_packet) router_out_South (Bit#(2) crossbar_selector);
-        actionvalue
         endactionvalue
     endmethod
-    
-    method ActionValue #(Router_core_packet) router_out_EAST (Bit#(2) crossbar_selector);
-        actionvalue
-        endactionvalue
-    endmethod
-    
-    method ActionValue #(Router_core_packet) router_out_WEST (Bit#(2) crossbar_selector);
-        actionvalue
-        endactionvalue
-    endmethod
-    // let Vector#(4, Router_core_packet) pkt = 
 endmodule: mk_router
 
 endpackage: router
