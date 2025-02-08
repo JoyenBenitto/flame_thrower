@@ -5,6 +5,7 @@ import StmtFSM:: *;
 import router:: *;
 import router_core:: *;
 
+(*synthesize*)
 module mk_tb_router(Empty);
 
   Ifc_router router_0_0 <- mk_router();
@@ -52,9 +53,9 @@ module mk_tb_router(Empty);
   rule read_north;
     received_north_reg_0_0 <= router_0_0.router_out_north();
     received_north_reg_0_1 <= router_0_1.router_out_north();
-    $display("Testbench: Received packet from router_out_north_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_north_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
              received_north_reg_0_0.router_id_x, received_north_reg_0_0.router_id_y, received_north_reg_0_0.payload);
-    $display("Testbench: Received packet from router_out_north_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_north_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
              received_north_reg_0_1.router_id_x, received_north_reg_0_1.router_id_y, received_north_reg_0_1.payload);
   endrule
 
@@ -62,9 +63,9 @@ module mk_tb_router(Empty);
   rule read_south;
     received_south_reg_0_0 <= router_0_0.router_out_south();
     received_south_reg_0_1 <= router_0_0.router_out_south();
-    $display("Testbench: Received packet from router_out_south_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_south_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
              received_south_reg_0_0.router_id_x, received_south_reg_0_0.router_id_y, received_south_reg_0_0.payload);
-    $display("Testbench: Received packet from router_out_south_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_south_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
              received_south_reg_0_1.router_id_x, received_south_reg_0_1.router_id_y, received_south_reg_0_1.payload);
   endrule
 
@@ -72,9 +73,9 @@ module mk_tb_router(Empty);
   rule read_east;
     received_east_reg_0_0 <= router_0_0.router_out_east();
     received_east_reg_0_1 <= router_0_1.router_out_east();
-    $display("Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
              received_east_reg_0_0.router_id_x, received_east_reg_0_0.router_id_y, received_east_reg_0_0.payload);
-    $display("Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
              received_east_reg_0_1.router_id_x, received_east_reg_0_1.router_id_y, received_east_reg_0_1.payload);
   endrule
 
@@ -82,9 +83,9 @@ module mk_tb_router(Empty);
   rule read_west;
     received_west_reg_0_0 <= router_0_0.router_out_west();
     received_west_reg_0_1 <= router_0_1.router_out_west();
-    $display("Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
              received_west_reg_0_0.router_id_x, received_west_reg_0_0.router_id_y, received_west_reg_0_0.payload);
-    $display("Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
+    $display($time, "Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
              received_west_reg_0_1.router_id_x, received_west_reg_0_1.router_id_y, received_west_reg_0_1.payload);
   endrule
 
