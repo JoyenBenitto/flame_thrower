@@ -9,16 +9,14 @@ import Vector        ::   *  ;
 
 
 interface Ifc_router;
-    //checks if the queue is available and queue's data
     method Action queue_data_vc1(Router_core_packet data); //data from channel one
     method Action queue_data_vc2(Router_core_packet data); //data from channel two
     method Action queue_data_vc3(Router_core_packet data); //data from channel three
     method Action queue_data_vc4(Router_core_packet data); //data from channel four
-    //The below will provide interface wires that can be used to connect
-    method ActionValue #(Router_core_packet) router_out_North (); //the arbiter will choose the Input channel to route
-    // method ActionValue #(Router_core_packet) router_out_South (Bit#(2) crossbar_selector);
-    // method ActionValue #(Router_core_packet) router_out_EAST (Bit#(2) crossbar_selector);
-    // method ActionValue #(Router_core_packet) router_out_WEST (Bit#(2) crossbar_selector);
+    method Router_core_packet router_out_north ();
+    method Router_core_packet router_out_south ();
+    method Router_core_packet router_out_east ();
+    method Router_core_packet router_out_west ();
 endinterface: Ifc_router
 
 (*synthesize*)
@@ -48,6 +46,11 @@ module mk_router(Ifc_router);
     Ifc_router_core rc_vc_3 <- mk_router_core(0,0); //router controller for vc-3
     Ifc_router_core rc_vc_4 <- mk_router_core(0,0); //router controller for vc-4
 
+    Reg#(Router_core_packet) north_wire <- mkRegU;
+    Reg#(Router_core_packet) south_wire <- mkRegU;
+    Reg#(Router_core_packet) east_wire <- mkRegU;
+    Reg#(Router_core_packet) west_wire <- mkRegU;
+
     rule north_arbiteration;
         north_arbiter.clients[0].request();
         north_arbiter.clients[1].request();
@@ -55,51 +58,107 @@ module mk_router(Ifc_router);
         north_arbiter.clients[3].request();
     endrule
 
-    rule grant_log_display;
-        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
-        $display($time, " north_vc2 grant status: %d", north_arbiter.clients[1].grant());
-        $display($time, " north_vc3 grant status: %d", north_arbiter.clients[2].grant());
-        $display($time, " north_vc4 grant status: %d", north_arbiter.clients[3].grant());
-        $display("\n");
+
+    rule south_arbiteration;
+        south_arbiter.clients[0].request();
+        south_arbiter.clients[1].request();
+        south_arbiter.clients[2].request();
+        south_arbiter.clients[3].request();
     endrule
 
-    method Action queue_data_vc1(Router_core_packet incoming_packet);
-        action
-            Direction dir <- rc_vc_1.router_core(incoming_packet);
-            vc_1.queue_data(dir, incoming_packet);
-        endaction
-    endmethod
-    method Action queue_data_vc2(Router_core_packet incoming_packet);
-        action
-            Direction dir <- rc_vc_2.router_core(incoming_packet);
-            vc_2.queue_data(dir, incoming_packet);
-        endaction
-    endmethod
-    method Action queue_data_vc3(Router_core_packet incoming_packet);
-        action
-            Direction dir <- rc_vc_3.router_core(incoming_packet);
-            vc_3.queue_data(dir, incoming_packet);
-        endaction
-    endmethod
-    method Action queue_data_vc4(Router_core_packet incoming_packet);
-        action
-            Direction dir <- rc_vc_4.router_core(incoming_packet);
-            vc_4.queue_data(dir, incoming_packet);
-        endaction
+    rule east_arbiteration;
+        east_arbiter.clients[0].request();
+        east_arbiter.clients[1].request();
+        east_arbiter.clients[2].request();
+        east_arbiter.clients[3].request();
+    endrule
+
+    rule west_arbiteration;
+        west_arbiter.clients[0].request();
+        west_arbiter.clients[1].request();
+        west_arbiter.clients[2].request();
+        west_arbiter.clients[3].request();
+    endrule
+
+    //North out
+    rule north_grant_vc1 (north_arbiter.clients[0].grant()); begin
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        let north_data <- vc_1.packet_pop(NORTH);
+        north_wire <= north_data;
+        end
+    endrule
+
+
+    rule north_grant_vc2 (north_arbiter.clients[1].grant()); begin
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        let north_data <- vc_2.packet_pop(NORTH);
+        north_wire <= north_data;
+        end
+    endrule
+
+
+    rule north_grant_vc3 (north_arbiter.clients[2].grant()); begin
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        let north_data <- vc_3.packet_pop(NORTH);
+        north_wire <= north_data;
+        end
+    endrule
+
+    rule north_grant_vc4 (north_arbiter.clients[3].grant()); begin
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        let north_data <- vc_4.packet_pop(NORTH);
+        north_wire <= north_data;
+        end
+    endrule
+
+
+    //south out
+    rule south_grant_vc1 (south_arbiter.clients[0].grant()); begin
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        let south_data <- vc_1.packet_pop(SOUTH);
+        south_wire <= south_data;
+        end
+    endrule
+
+
+    rule south_grant_vc2 (south_arbiter.clients[1].grant()); begin
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        let south_data <- vc_2.packet_pop(SOUTH);
+        south_wire <= south_data;
+        end
+    endrule
+
+
+    rule south_grant_vc3 (south_arbiter.clients[2].grant()); begin
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        let south_data <- vc_3.packet_pop(SOUTH);
+        south_wire <= south_data;
+        end
+    endrule
+
+    rule south_grant_vc4 (south_arbiter.clients[3].grant()); begin
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        let south_data <- vc_4.packet_pop(SOUTH);
+        south_wire <= south_data;
+        end
+    endrule
+
+    method Router_core_packet router_out_north();
+        return north_wire;
     endmethod
 
-    method ActionValue #(Router_core_packet) router_out_North ();
-        actionvalue
-            if (north_arbiter.clients[0].grant())begin
-                $display("dequeing and poping vc_1 north");
-                return vc_1.packet_pop(NORTH);
-            end
-            else begin
-                return vc_2.packet_pop(NORTH);
-            end
-
-        endactionvalue
+    method Router_core_packet router_out_south();
+        return south_wire;
     endmethod
+
+    method Router_core_packet router_out_east();
+        return east_wire;
+    endmethod
+
+    method Router_core_packet router_out_west();
+        return west_wire;
+    endmethod
+
 endmodule: mk_router
 
 endpackage: router
