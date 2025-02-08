@@ -12,13 +12,13 @@ typedef enum {
     PE } Direction deriving(Bits, Eq);
 
 //The payload type
-typedef Bit#(`PAYLOAD_WIDTH) Payload;
+/* typedef Bit#(`PAYLOAD_WIDTH) Payload; */
 
 //The network interface sends data in this particular format
 typedef struct{
     Bit#(`NUMBER_OF_ROUTERS_x) router_id_x; //the x id
     Bit#(`NUMBER_OF_ROUTERS_y) router_id_y; //the y id
-    Payload payload; //the data
+    Bit#(`PAYLOAD_WIDTH) payload; //the data
 } Router_core_packet deriving(Bits, Eq);
 
 interface Ifc_router_core;
