@@ -90,7 +90,7 @@ module mk_router(Ifc_router);
 
 
     rule north_grant_vc2 (north_arbiter.clients[1].grant()); begin
-        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[1].grant());
         let north_data <- vc_2.packet_pop(NORTH);
         north_wire <= north_data;
         end
@@ -98,14 +98,14 @@ module mk_router(Ifc_router);
 
 
     rule north_grant_vc3 (north_arbiter.clients[2].grant()); begin
-        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[2].grant());
         let north_data <- vc_3.packet_pop(NORTH);
         north_wire <= north_data;
         end
     endrule
 
     rule north_grant_vc4 (north_arbiter.clients[3].grant()); begin
-        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[0].grant());
+        $display($time, " north_vc1 grant status: %d", north_arbiter.clients[3].grant());
         let north_data <- vc_4.packet_pop(NORTH);
         north_wire <= north_data;
         end
@@ -122,7 +122,7 @@ module mk_router(Ifc_router);
 
 
     rule south_grant_vc2 (south_arbiter.clients[1].grant()); begin
-        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[1].grant());
         let south_data <- vc_2.packet_pop(SOUTH);
         south_wire <= south_data;
         end
@@ -130,19 +130,79 @@ module mk_router(Ifc_router);
 
 
     rule south_grant_vc3 (south_arbiter.clients[2].grant()); begin
-        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[2].grant());
         let south_data <- vc_3.packet_pop(SOUTH);
         south_wire <= south_data;
         end
     endrule
 
     rule south_grant_vc4 (south_arbiter.clients[3].grant()); begin
-        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[0].grant());
+        $display($time, " south_vc1 grant status: %d", south_arbiter.clients[3].grant());
         let south_data <- vc_4.packet_pop(SOUTH);
         south_wire <= south_data;
         end
     endrule
 
+    //east out
+    rule east_grant_vc1 (east_arbiter.clients[0].grant()); begin
+        $display($time, " east_vc1 grant status: %d", east_arbiter.clients[0].grant());
+        let east_data <- vc_1.packet_pop(EAST);
+        east_wire <= east_data;
+        end
+    endrule
+
+    rule east_grant_vc2 (east_arbiter.clients[1].grant()); begin
+        $display($time, " east_vc1 grant status: %d", east_arbiter.clients[1].grant());
+        let east_data <- vc_2.packet_pop(EAST);
+        east_wire <= east_data;
+        end
+    endrule
+
+
+    rule east_grant_vc3 (east_arbiter.clients[2].grant()); begin
+        $display($time, " east_vc1 grant status: %d", east_arbiter.clients[2].grant());
+        let east_data <- vc_3.packet_pop(EAST);
+        east_wire <= east_data;
+        end
+    endrule
+
+    rule east_grant_vc4 (east_arbiter.clients[3].grant()); begin
+        $display($time, " east_vc1 grant status: %d", east_arbiter.clients[3].grant());
+        let east_data <- vc_4.packet_pop(EAST);
+        east_wire <= east_data;
+        end
+    endrule
+
+
+    //west out
+    rule west_grant_vc1 (west_arbiter.clients[0].grant()); begin
+        $display($time, " west_vc1 grant status: %d", west_arbiter.clients[0].grant());
+        let west_data <- vc_1.packet_pop(WEST);
+        west_wire <= west_data;
+        end
+    endrule
+
+    rule west_grant_vc2 (west_arbiter.clients[1].grant()); begin
+        $display($time, " west_vc1 grant status: %d", west_arbiter.clients[1].grant());
+        let west_data <- vc_2.packet_pop(WEST);
+        west_wire <= west_data;
+        end
+    endrule
+
+
+    rule west_grant_vc3 (west_arbiter.clients[2].grant()); begin
+        $display($time, " west_vc1 grant status: %d", west_arbiter.clients[2].grant());
+        let west_data <- vc_3.packet_pop(WEST);
+        west_wire <= west_data;
+        end
+    endrule
+
+    rule west_grant_vc4 (west_arbiter.clients[3].grant()); begin
+        $display($time, " west_vc1 grant status: %d", west_arbiter.clients[3].grant());
+        let west_data <- vc_4.packet_pop(WEST);
+        west_wire <= west_data;
+        end
+    endrule
     method Router_core_packet router_out_north();
         return north_wire;
     endmethod
