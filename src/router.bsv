@@ -36,10 +36,10 @@ module mk_router(Ifc_router);
     Arbiter_IFC#(4) west_arbiter <- mkArbiter(False);
 
     //The buffer is arranged in a SAFQ (Statically allocated fixed queue) manner
-    Ifc_buffer vc_1 <- mk_buffer(); //virtual channel 1
-    Ifc_buffer vc_2 <- mk_buffer(); //virtual channel 2
-    Ifc_buffer vc_3 <- mk_buffer(); //virtual channel 3
-    Ifc_buffer vc_4 <- mk_buffer(); //virtual channel 4
+    Ifc_buffer vc_1 <- mk_buffer(); //virtual channel 1 NE
+    Ifc_buffer vc_2 <- mk_buffer(); //virtual channel 2 WE
+    Ifc_buffer vc_3 <- mk_buffer(); //virtual channel 3 SE
+    Ifc_buffer vc_4 <- mk_buffer(); //virtual channel 4 EE
 
     Ifc_router_core rc_vc_1 <- mk_router_core(0,0); //router controller for vc-1
     Ifc_router_core rc_vc_2 <- mk_router_core(0,0); //router controller for vc-2

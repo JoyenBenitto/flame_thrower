@@ -1,12 +1,22 @@
 package tb_router;
 
-import StmtFSM::*;
-import router::*;
-import router_core::*;
+import Connectable:: * ;
+import StmtFSM:: *;
+import router:: *;
+import router_core:: *;
 
 module mk_tb_router(Empty);
 
-  Ifc_router router <- mk_router();
+  Ifc_router router_0_0 <- mk_router();
+  Ifc_router router_0_1 <- mk_router();
+  Ifc_router router_1_0 <- mk_router();
+  Ifc_router router_1_1 <- mk_router();
+
+  mkConnection(router_0_0.router_out_north, router_0_1.queue_data_vc1);
+  mkConnection(router_0_0.queue_data_vc1, router_0_1.router_out_south);
+  mkConnection(router_0_0.router_out_east, router_1_0.queue_data_vc2);
+  mkConnection(router_0_0.queue_data_vc4, router_0_1.router_out_west);
+  
 
   // Packet to send
   Reg#(Router_core_packet) packet_reg <- mkReg(
@@ -22,44 +32,60 @@ module mk_tb_router(Empty);
 
   // Rule to enqueue the packet
   rule enqueue_packet if (!enqueued);
-    router.queue_data_vc1(packet_reg);
+    router_0_0.queue_data_vc3(packet_reg);
     $display("Testbench: Enqueued packet: router_id_x=%d, router_id_y=%d, payload=%d",
              packet_reg.router_id_x, packet_reg.router_id_y, packet_reg.payload);
     enqueued <= True;
   endrule
 
   // Registers to hold received packets from each port
-  Reg#(Router_core_packet) received_north_reg <- mkRegU;
-  Reg#(Router_core_packet) received_south_reg <- mkRegU;
-  Reg#(Router_core_packet) received_east_reg <- mkRegU;
-  Reg#(Router_core_packet) received_west_reg <- mkRegU;
+  Reg#(Router_core_packet) received_north_reg_0_0 <- mkRegU;
+  Reg#(Router_core_packet) received_south_reg_0_0 <- mkRegU;
+  Reg#(Router_core_packet) received_east_reg_0_0 <- mkRegU;
+  Reg#(Router_core_packet) received_west_reg_0_0 <- mkRegU;
+  Reg#(Router_core_packet) received_north_reg_0_1 <- mkRegU;
+  Reg#(Router_core_packet) received_south_reg_0_1 <- mkRegU;
+  Reg#(Router_core_packet) received_east_reg_0_1 <- mkRegU;
+  Reg#(Router_core_packet) received_west_reg_0_1 <- mkRegU;
 
   // Rule to read the North output
   rule read_north;
-    received_north_reg <= router.router_out_north();
-    $display("Testbench: Received packet from router_out_north: router_id_x=%d, router_id_y=%d, payload=%d",
-             received_north_reg.router_id_x, received_north_reg.router_id_y, received_north_reg.payload);
+    received_north_reg_0_0 <= router_0_0.router_out_north();
+    received_north_reg_0_1 <= router_0_1.router_out_north();
+    $display("Testbench: Received packet from router_out_north_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_north_reg_0_0.router_id_x, received_north_reg_0_0.router_id_y, received_north_reg_0_0.payload);
+    $display("Testbench: Received packet from router_out_north_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_north_reg_0_1.router_id_x, received_north_reg_0_1.router_id_y, received_north_reg_0_1.payload);
   endrule
 
   // Rule to read the South output
   rule read_south;
-    received_south_reg <= router.router_out_south();
-    $display("Testbench: Received packet from router_out_south: router_id_x=%d, router_id_y=%d, payload=%d",
-             received_south_reg.router_id_x, received_south_reg.router_id_y, received_south_reg.payload);
+    received_south_reg_0_0 <= router_0_0.router_out_south();
+    received_south_reg_0_1 <= router_0_0.router_out_south();
+    $display("Testbench: Received packet from router_out_south_0_0: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_south_reg_0_0.router_id_x, received_south_reg_0_0.router_id_y, received_south_reg_0_0.payload);
+    $display("Testbench: Received packet from router_out_south_0_1: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_south_reg_0_1.router_id_x, received_south_reg_0_1.router_id_y, received_south_reg_0_1.payload);
   endrule
 
   // Rule to read the East output
   rule read_east;
-    received_east_reg <= router.router_out_east();
+    received_east_reg_0_0 <= router_0_0.router_out_east();
+    received_east_reg_0_1 <= router_0_1.router_out_east();
     $display("Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
-             received_east_reg.router_id_x, received_east_reg.router_id_y, received_east_reg.payload);
+             received_east_reg_0_0.router_id_x, received_east_reg_0_0.router_id_y, received_east_reg_0_0.payload);
+    $display("Testbench: Received packet from router_out_east: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_east_reg_0_1.router_id_x, received_east_reg_0_1.router_id_y, received_east_reg_0_1.payload);
   endrule
 
   // Rule to read the West output
   rule read_west;
-    received_west_reg <= router.router_out_west();
+    received_west_reg_0_0 <= router_0_0.router_out_west();
+    received_west_reg_0_1 <= router_0_1.router_out_west();
     $display("Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
-             received_west_reg.router_id_x, received_west_reg.router_id_y, received_west_reg.payload);
+             received_west_reg_0_0.router_id_x, received_west_reg_0_0.router_id_y, received_west_reg_0_0.payload);
+    $display("Testbench: Received packet from router_out_west: router_id_x=%d, router_id_y=%d, payload=%d",
+             received_west_reg_0_1.router_id_x, received_west_reg_0_1.router_id_y, received_west_reg_0_1.payload);
   endrule
 
 endmodule
