@@ -14,7 +14,6 @@ interface Ifc_buffer;
     method ActionValue #(Router_core_packet) packet_pop(Direction fifo_id);
 endinterface: Ifc_buffer
 
-(*synthesize*)
 module mk_buffer(Ifc_buffer);
     //FIFO bank
     FIFOF#(Router_core_packet) north <- mkSizedFIFOF(`FIFO_DEPTH);

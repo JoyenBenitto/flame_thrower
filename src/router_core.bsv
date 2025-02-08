@@ -27,7 +27,6 @@ interface Ifc_router_core;
 endinterface
 
 //for now we will follow xy routing
-(*synthesize*)
 module mk_router_core #(Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, Bit#(`NUMBER_OF_ROUTERS_y) curr_router_id_y) 
     (Ifc_router_core);
 
