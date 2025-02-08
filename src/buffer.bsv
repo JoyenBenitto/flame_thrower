@@ -3,6 +3,7 @@ package buffer;
 
 import FIFO          ::  *;
 import FIFOF         ::  *;
+import SpecialFIFOs :: * ;
 import router_core   ::  *;
 
 //some macros
@@ -16,11 +17,11 @@ endinterface: Ifc_buffer
 
 module mk_buffer(Ifc_buffer);
     //FIFO bank
-    FIFOF#(Router_core_packet) north <- mkSizedFIFOF(`FIFO_DEPTH);
-    FIFOF#(Router_core_packet) south <- mkSizedFIFOF(`FIFO_DEPTH);
-    FIFOF#(Router_core_packet) east <- mkSizedFIFOF(`FIFO_DEPTH);
-    FIFOF#(Router_core_packet) west <- mkSizedFIFOF(`FIFO_DEPTH);
-    FIFOF#(Router_core_packet) pe <- mkSizedFIFOF(`FIFO_DEPTH);
+    FIFOF#(Router_core_packet) north <- mkSizedBypassFIFOF(`FIFO_DEPTH);
+    FIFOF#(Router_core_packet) south <- mkSizedBypassFIFOF(`FIFO_DEPTH);
+    FIFOF#(Router_core_packet) east <- mkSizedBypassFIFOF(`FIFO_DEPTH);
+    FIFOF#(Router_core_packet) west <- mkSizedBypassFIFOF(`FIFO_DEPTH);
+    FIFOF#(Router_core_packet) pe <- mkSizedBypassFIFOF(`FIFO_DEPTH);
 
     method Action queue_data(Direction fifo_id, Router_core_packet data);
         action
