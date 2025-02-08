@@ -189,7 +189,6 @@ module mk_router(Ifc_router);
         end
     endrule
 
-
     rule west_grant_vc3 (west_arbiter.clients[2].grant()); begin
         $display($time, " west_vc1 grant status: %d", west_arbiter.clients[2].grant());
         let west_data <- vc_3.packet_pop(WEST);
@@ -203,6 +202,35 @@ module mk_router(Ifc_router);
         west_wire <= west_data;
         end
     endrule
+
+    method Action queue_data_vc1(Router_core_packet incoming_packet);
+        action
+            Direction dir <- rc_vc_1.router_core(incoming_packet);
+            vc_1.queue_data(dir, incoming_packet);
+        endaction
+    endmethod
+
+    method Action queue_data_vc2(Router_core_packet incoming_packet);
+        action
+            Direction dir <- rc_vc_2.router_core(incoming_packet);
+            vc_2.queue_data(dir, incoming_packet);
+        endaction
+    endmethod
+
+    method Action queue_data_vc3(Router_core_packet incoming_packet);
+        action
+            Direction dir <- rc_vc_3.router_core(incoming_packet);
+            vc_3.queue_data(dir, incoming_packet);
+        endaction
+    endmethod
+
+    method Action queue_data_vc4(Router_core_packet incoming_packet);
+        action
+            Direction dir <- rc_vc_4.router_core(incoming_packet);
+            vc_4.queue_data(dir, incoming_packet);
+        endaction
+    endmethod
+
     method Router_core_packet router_out_north();
         return north_wire;
     endmethod
