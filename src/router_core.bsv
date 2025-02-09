@@ -3,6 +3,8 @@ package router_core;
 `define NUMBER_OF_ROUTERS_x 2
 `define NUMBER_OF_ROUTERS_y 2
 `define PAYLOAD_WIDTH 32
+`define XY_ROUTING True
+`define YX_ROUTING False
 
 typedef enum {
     NORTH,
@@ -40,6 +42,35 @@ Bit#(`NUMBER_OF_ROUTERS_y) curr_router_id_y);
     return dir;
 endfunction
 
+
+function Direction yx_routing(Router_core_packet packet, Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, 
+Bit#(`NUMBER_OF_ROUTERS_y) curr_router_id_y);
+
+    Direction dir= ?;
+    if (packet.router_id_y != curr_router_id_y) begin
+        if (packet.router_id_y > curr_router_id_y) begin
+            dir= NORTH;
+        end
+        else if (packet.router_id_y < curr_router_id_y)begin
+            dir= SOUTH;
+        end
+    end
+
+    else if (packet.router_id_y == curr_router_id_y) begin
+        if (packet.router_id_x > curr_router_id_x) begin
+            dir= EAST;
+        end
+        else if (packet.router_id_x < curr_router_id_x)begin
+            dir= WEST;
+        end
+    end
+    else if ((packet.router_id_y == curr_router_id_y) &&
+        (packet.router_id_y == curr_router_id_y)) begin
+        dir = PE;
+    end
+    return dir;
+endfunction
+
 //The network interface sends data in this particular format
 typedef struct{
     Bit#(`NUMBER_OF_ROUTERS_x) router_id_x; //the x id
@@ -58,7 +89,13 @@ module mk_router_core #(Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, Bit#(`NUMBE
 
     method ActionValue #(Direction) router_core (Router_core_packet packet);
         actionvalue
-            return xy_routing(packet, curr_router_id_x, curr_router_id_y);
+            `ifdef XY_ROUTING
+                return xy_routing(packet, curr_router_id_x, curr_router_id_y);
+            `elsif YX_ROUTING
+                return yx_routing(packet, curr_router_id_x, curr_router_id_y);
+            else
+                return xy_routing(packet, curr_router_id_x, curr_router_id_y);
+            `endif
         endactionvalue
     endmethod
 endmodule
