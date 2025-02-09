@@ -11,8 +11,34 @@ typedef enum {
     WEST,
     PE } Direction deriving(Bits, Eq);
 
-//The payload type
-/* typedef Bit#(`PAYLOAD_WIDTH) Payload; */
+//function with logic to perform the xy routing
+function Direction xy_routing(Router_core_packet packet, Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, 
+Bit#(`NUMBER_OF_ROUTERS_y) curr_router_id_y);
+
+    Direction dir= ?;
+    if (packet.router_id_x != curr_router_id_x) begin
+        if (packet.router_id_x > curr_router_id_x) begin
+            dir= EAST;
+        end
+        else if (packet.router_id_x < curr_router_id_x)begin
+            dir= WEST;
+        end
+    end
+
+    else if (packet.router_id_x == curr_router_id_x) begin
+        if (packet.router_id_y > curr_router_id_y) begin
+            dir= NORTH;
+        end
+        else if (packet.router_id_y < curr_router_id_y)begin
+            dir= SOUTH;
+        end
+    end
+    else if ((packet.router_id_x == curr_router_id_x) &&
+        (packet.router_id_x == curr_router_id_x)) begin
+        dir = PE;
+    end
+    return dir;
+endfunction
 
 //The network interface sends data in this particular format
 typedef struct{
@@ -31,30 +57,8 @@ module mk_router_core #(Bit#(`NUMBER_OF_ROUTERS_x) curr_router_id_x, Bit#(`NUMBE
     (Ifc_router_core);
 
     method ActionValue #(Direction) router_core (Router_core_packet packet);
-        Direction dir= ?;
         actionvalue
-            if (packet.router_id_x != curr_router_id_x) begin
-                if (packet.router_id_x > curr_router_id_x) begin
-                    dir= EAST;
-                end
-                else if (packet.router_id_x < curr_router_id_x)begin
-                    dir= WEST;
-                end
-            end
-
-            else if (packet.router_id_x == curr_router_id_x) begin
-                if (packet.router_id_y > curr_router_id_y) begin
-                    dir= NORTH;
-                end
-                else if (packet.router_id_y < curr_router_id_y)begin
-                    dir= SOUTH;
-                end
-            end
-            else if ((packet.router_id_x == curr_router_id_x) &&
-                (packet.router_id_x == curr_router_id_x)) begin
-                dir = PE;
-            end
-            return dir;
+            return xy_routing(packet, curr_router_id_x, curr_router_id_y);
         endactionvalue
     endmethod
 endmodule
