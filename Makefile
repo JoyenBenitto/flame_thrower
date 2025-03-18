@@ -53,6 +53,12 @@ SYNTH_DIR=./build/synth
 LIB_SKY130_PATH=./OpenROAD-flow-scripts/flow/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 BSV_VLIB_DIR=/bluespec/lib/Verilog
 
+# OpenSTA timing analysis setup
+OPENSTA_BIN=/home/joyen/Desktop/OpenSTA/app/sta
+TIMING_SCRIPTS_DIR=./scripts
+SCRIPTS_DIR=./scripts
+REPORT_DIR=$(SYNTH_DIR)/reports
+
 .PHONY: generate_synth_verilog
 generate_synth_verilog: 
 	@echo "Generating synthesizable Verilog"
@@ -100,3 +106,99 @@ synth: synth_prepare
 		write_verilog -noattr $(SYNTH_DIR)/$(TOP_MODULE)_synth.v; \
 		stat -liberty $(LIB_SKY130_PATH)" | tee $(SYNTH_DIR)/synth.log || (echo "Synthesis failed, see $(SYNTH_DIR)/synth.log for details." && exit 1)
 	@echo "Synthesis completed. Results in $(SYNTH_DIR)/$(TOP_MODULE)_synth.v"
+
+.PHONY: synth timing report sdf constraints help
+
+# Main timing analysis target
+.PHONY: timing sta sta_background
+timing: sta
+
+sta: synth
+	@echo "Running timing analysis with OpenSTA"
+	@mkdir -p $(REPORT_DIR)
+	@export LIB_SKY130_PATH=$(LIB_SKY130_PATH) && \
+	export SYNTH_NETLIST=$(SYNTH_DIR)/$(TOP_MODULE)_synth.v && \
+	export TOP_MODULE=$(TOP_MODULE) && \
+	export SDC_FILE=$(SDC_FILE) && \
+	export REPORT_DIR=$(REPORT_DIR) && \
+	$(SCRIPTS_DIR)/run_sta.sh
+	@echo "Timing analysis completed. Run 'make report' to generate a comprehensive report."
+
+# Background execution version of STA (non-blocking)
+sta_background: synth
+	@echo "Running timing analysis with OpenSTA in background (non-blocking)"
+	@mkdir -p $(REPORT_DIR)
+	@export LIB_SKY130_PATH=$(LIB_SKY130_PATH) && \
+	export SYNTH_NETLIST=$(SYNTH_DIR)/$(TOP_MODULE)_synth.v && \
+	export TOP_MODULE=$(TOP_MODULE) && \
+	export SDC_FILE=$(SDC_FILE) && \
+	export REPORT_DIR=$(REPORT_DIR) && \
+	$(SCRIPTS_DIR)/run_sta.sh &
+	@echo "Timing analysis launched in background. Check $(REPORT_DIR)/sta_full_report.log for progress."
+
+# Generate a consolidated YAML report with synthesis and timing data
+report:
+	@echo "Generating consolidated synthesis and timing report..."
+	@./scripts/generate_report.sh
+	@echo "Report available at $(REPORT_DIR)/design_report.yaml"
+	@echo ""
+	@echo "Quick summary:"
+	@if [ -f "$(REPORT_DIR)/design_report.yaml" ]; then \
+		grep -A 3 "worst_setup_slack:" $(REPORT_DIR)/design_report.yaml | head -4; \
+		echo "For full details, view the report with 'cat $(REPORT_DIR)/design_report.yaml'"; \
+	fi
+
+
+
+.PHONY: sdf
+sdf: timing
+	@echo "Generating SDF file for $(TOP_MODULE)"
+	@mkdir -p $(REPORT_DIR)
+	@export LIB_SKY130_PATH=$(LIB_SKY130_PATH) && \
+	export SYNTH_NETLIST=$(SYNTH_DIR)/$(TOP_MODULE)_synth.v && \
+	export TOP_MODULE=$(TOP_MODULE) && \
+	export SDC_FILE=$(SDC_FILE) && \
+	export SDF_OUTPUT=$(SYNTH_DIR)/$(TOP_MODULE).sdf && \
+	timeout 300s $(OPENSTA_BIN) $(SCRIPTS_DIR)/sta_wrapper.tcl $(SCRIPTS_DIR)/generate_sdf.tcl | tee $(REPORT_DIR)/sdf_generation.log
+	@echo "SDF generation completed. Results in $(SYNTH_DIR)/$(TOP_MODULE).sdf"
+	@echo "Run 'make report' to update the consolidated report with this information."
+
+# Simplified targets that redirect to proper commands
+.PHONY: generate_sdf estimate_constraints timing_report
+
+generate_sdf:
+	@echo "'generate_sdf' is deprecated, use 'make sdf' instead"
+	@make sdf
+
+timing_report:
+	@echo "'timing_report' is deprecated, use 'make report' instead"
+	@make report
+
+.PHONY: constraints
+constraints: timing
+	@echo "Estimating timing constraints for $(TOP_MODULE)"
+	@mkdir -p $(REPORT_DIR)
+	@export LIB_SKY130_PATH=$(LIB_SKY130_PATH) && \
+	export SYNTH_NETLIST=$(SYNTH_DIR)/$(TOP_MODULE)_synth.v && \
+	export TOP_MODULE=$(TOP_MODULE) && \
+	timeout 300s $(OPENSTA_BIN) $(SCRIPTS_DIR)/sta_wrapper.tcl $(SCRIPTS_DIR)/estimate_constraints.tcl | tee $(REPORT_DIR)/constraint_estimation.log
+	@echo "Constraint estimation completed. Results in $(REPORT_DIR)/constraint_estimation.log"
+	@echo "You can use these as a starting point for creating an SDC file."
+	@echo "Run 'make report' to update the consolidated report with this information."
+
+estimate_constraints:
+	@echo "'estimate_constraints' is deprecated, use 'make constraints' instead"
+	@make constraints
+
+# Show help for available commands
+.PHONY: help
+help:
+	@echo "Available Commands:"
+	@echo "  make synth         - Run synthesis"
+	@echo "  make timing       - Run timing analysis"
+	@echo "  make sdf          - Generate SDF file for simulation"
+	@echo "  make constraints  - Estimate timing constraints"
+	@echo "  make report       - Generate comprehensive report"
+	@echo "  make help         - Show this help"
+	@echo ""
+	@echo "Flow: 1) synth → 2) timing → 3) report"

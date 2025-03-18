@@ -1,4 +1,5 @@
 build/
+external/
 *.txt
 *.log
 *.vcd
