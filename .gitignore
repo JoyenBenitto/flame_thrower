@@ -2,3 +2,5 @@ build/
 *.txt
 *.log
 *.vcd
+OpenROAD-flow-scripts/
+skywater-pdk/
